@@ -1,0 +1,14 @@
+[
+  {
+    "id": "welcome",
+    "name": "Template 1: New Welcome",
+    "subject": "Welcome to {companyName}!",
+    "body": "Hi {agentName},\n\nThis is a quick note to welcome you to {companyName}. We are very excited to be working with you.\n\nLet us know if you have any questions.\n\nBest,\n[Your Name]"
+  },
+  {
+    "id": "followup",
+    "name": "Template 2: Simple Follow-Up",
+    "subject": "Checking in from [Your Company]",
+    "body": "Hi {agentName},\n\nI'm just following up on our last conversation. Do you have any updates for me?\n\nThanks,\n[Your Name]"
+  }
+]

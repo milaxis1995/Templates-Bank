@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Template Bank</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Email Template Bank</h1>
+
+        <div class="selectors">
+            <div class="dropdown-group">
+                <label for="agency-select">1. Select Agency:</label>
+                <select id="agency-select">
+                    <option value="">Loading Agencies...</option>
+                </select>
+            </div>
+
+            <div class="dropdown-group">
+                <label for="contact-select">2. Select Contact:</label>
+                <select id="contact-select" disabled>
+                    <option value="">First, select an agency...</option>
+                </select>
+            </div>
+
+            <div class="dropdown-group">
+                <label for="template-select">3. Select Template:</label>
+                <select id="template-select" disabled>
+                    <option value="">Loading Templates...</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="output">
+            <h2>Generated Email</h2>
+            
+            <label for="output-subject">Subject:</label>
+            <div class="copy-wrapper">
+                <input type_text" id="output-subject" readonly placeholder="Your subject will appear here...">
+                <button id="copy-subject-btn">Copy</button>
+            </div>
+
+            <label for="output-body">Body:</label>
+            <div class="copy-wrapper">
+                <textarea id="output-body" rows="15" readonly placeholder="Your email body will appear here..."></textarea>
+                <button id="copy-body-btn">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js" defer></script>
+</body>
+</html>
