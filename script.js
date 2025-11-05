@@ -4,9 +4,7 @@ PART 1: CONFIGURATION
 ==================================================================
 */
 
-// !!! 1. PASTE YOUR GOOGLE SHEET URLs HERE !!!
-// Make sure they are the "Publish to the web" CSV links.
-
+// Your specific Google Sheet URLs are now hard-coded
 const CONTACTS_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThTvGwKFZxIua6liXm6VUviZXu8FxEb4vMupUlHlXATPbVLMLYko-_K7CwY8bCTW3pn-K-gnmWMpia/pub?gid=204847259&single=true&output=csv";
 const TEMPLATES_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vThTvGwKFZxIua6liXm6VUviZXu8FxEb4vMupUlHlXATPbVLMLYko-_K7CwY8bCTW3pn-K-gnmWMpia/pub?gid=1751353576&single=true&output=csv";
 
@@ -22,7 +20,8 @@ let allContacts = [];
 let allTemplates = [];
 
 // Get references to all the HTML elements we need to work with
-const agencySelect = document.getElementById("agency-select");
+// NOTE: We still call it 'agencySelect' because its ID in the HTML is 'agency-select'
+const agencySelect = document.getElementById("agency-select"); 
 const contactSelect = document.getElementById("contact-select");
 const templateSelect = document.getElementById("template-select");
 
@@ -48,11 +47,19 @@ document.addEventListener("DOMContentLoaded", () => {
 async function loadContacts() {
     try {
         const response = await fetch(CONTACTS_URL);
+        if (!response.ok) throw new Error('Network response was not ok');
         const csvText = await response.text();
-        // Store our contacts in the global variable
+        
         allContacts = csvToObjects(csvText);
-        // Now, populate the first dropdown
-        populateAgencyDropdown();
+        
+        // Check if data is empty or headers are wrong
+        if (allContacts.length === 0 || !allContacts[0]['COMPANY NAME']) {
+            console.error("Data is empty or 'COMPANY NAME' column not found.");
+            agencySelect.innerHTML = `<option value="">Check headers</option>`;
+            return;
+        }
+
+        populateCompanyDropdown();
     } catch (error) {
         console.error("Error fetching contacts:", error);
         agencySelect.innerHTML = `<option value="">Error loading contacts</option>`;
@@ -63,10 +70,17 @@ async function loadContacts() {
 async function loadTemplates() {
     try {
         const response = await fetch(TEMPLATES_URL);
+        if (!response.ok) throw new Error('Network response was not ok');
         const csvText = await response.text();
-        // Store our templates in the global variable
+        
         allTemplates = csvToObjects(csvText);
-        // Now, populate the template dropdown
+        
+        if (allTemplates.length === 0 || !allTemplates[0]['TemplateName']) {
+             console.error("Template data is empty or 'TemplateName' column not found.");
+             templateSelect.innerHTML = `<option value="">Check templates</option>`;
+             return;
+        }
+
         populateTemplateDropdown();
     } catch (error) {
         console.error("Error fetching templates:", error);
@@ -82,7 +96,8 @@ function csvToObjects(csv) {
     return lines.map(line => {
         const values = line.split(',');
         return headers.reduce((obj, header, index) => {
-            obj[header.trim()] = values[index].trim();
+            // Use (values[index] || '') to prevent errors on blank/short lines
+            obj[header.trim()] = (values[index] || '').trim();
             return obj;
         }, {});
     });
@@ -95,25 +110,27 @@ PART 4: POPULATING DROPDOWNS
 */
 
 // Populates the "Agency" dropdown with unique company names
-function populateAgencyDropdown() {
-    // Find all unique company names
+function populateCompanyDropdown() {
+    // Find all unique company names from the 'COMPANY NAME' column
     const companies = [...new Set(allContacts.map(contact => contact['COMPANY NAME']))];
-
-    agencySelect.innerHTML = `<option value="">Select a company...</option>`; // <-- Optional: I changed the text
+    
+    agencySelect.innerHTML = `<option value="">Select a company...</option>`;
     companies.sort().forEach(company => {
-        const option = new Option(company, company);
-        agencySelect.add(option);
+        if (company) { // Avoid adding blank entries
+            const option = new Option(company, company);
+            agencySelect.add(option);
+        }
     });
 }
 
-// Populates the "Contact" dropdown based on the selected agency
-function populateContactDropdown(selectedAgency) {
-    // Filter contacts that match the selected agency
-    const agencyContacts = allContacts.filter(contact => contact['COMPANY NAME'] === selectedAgency);
+// Populates the "Contact" dropdown based on the selected company
+function populateContactDropdown(selectedCompany) {
+    // Filter contacts that match the selected company name
+    const companyContacts = allContacts.filter(contact => contact['COMPANY NAME'] === selectedCompany);
     
     contactSelect.innerHTML = `<option value="">Select a contact...</option>`;
-    agencyContacts.forEach((contact, index) => {
-        // We use the contact's 'Agent Name' for the text
+    companyContacts.forEach(contact => {
+        // We use the contact's 'AGENT NAME' for the text
         // We use the *index* of the contact in the allContacts array as its value
         const originalIndex = allContacts.indexOf(contact);
         const option = new Option(contact['AGENT NAME'], originalIndex);
@@ -127,10 +144,12 @@ function populateContactDropdown(selectedAgency) {
 function populateTemplateDropdown() {
     templateSelect.innerHTML = `<option value="">Select a template...</option>`;
     allTemplates.forEach((template, index) => {
-        // We use the template's 'TemplateName' for the text
-        // We use its index as the value
-        const option = new Option(template.TemplateName, index);
-        templateSelect.add(option);
+        if (template.TemplateName) { // Avoid blank entries
+            // We use the template's 'TemplateName' for the text
+            // We use its index as the value
+            const option = new Option(template.TemplateName, index);
+            templateSelect.add(option);
+        }
     });
     // Enable the template dropdown
     templateSelect.disabled = false;
@@ -142,16 +161,16 @@ PART 5: EVENT LISTENERS (Making the page interactive)
 ==================================================================
 */
 
-// When an agency is chosen...
+// When a company is chosen...
 agencySelect.addEventListener("change", () => {
     // Reset the contact dropdown and output
     contactSelect.innerHTML = `<option value="">Select a contact...</option>`;
     contactSelect.disabled = true;
     clearOutput();
     
-    const selectedAgency = agencySelect.value;
-    if (selectedAgency) {
-        populateContactDropdown(selectedAgency);
+    const selectedCompany = agencySelect.value;
+    if (selectedCompany) {
+        populateContactDropdown(selectedCompany);
     }
 });
 
@@ -223,7 +242,7 @@ function copyToClipboard(element, button) {
     if (!element.value) return; // Don't copy empty text
     
     element.select();
-    document.execCommand("copy");
+    document.execCommand("copy"); // Use this for broad compatibility
     
     // Give visual feedback
     const originalText = button.textContent;
@@ -234,7 +253,4 @@ function copyToClipboard(element, button) {
         button.textContent = originalText;
         button.classList.remove("copied-feedback");
     }, 1500);
-
 }
-
-
