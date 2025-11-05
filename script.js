@@ -90,7 +90,7 @@ async function loadTemplates() {
 
 // This helper function turns CSV text into a nice array of objects
 function csvToObjects(csv) {
-    // --- UPDATED PARSER ---
+    // --- NEW ROBUST PARSER ---
     let csvData = csv;
 
     // Step 1: Remove Byte Order Mark (BOM) if present (invisible char)
@@ -101,25 +101,69 @@ function csvToObjects(csv) {
     // Step 2: Split into lines robustly (handles \n and \r\n)
     const lines = csvData.trim().split(/\r?\n/);
     
-    if (lines.length === 0) {
+    if (lines.length < 2) { // Need at least 1 header line and 1 data line
+        console.error("CSV data is empty or has no data rows.");
         return [];
     }
 
-    // Step 3: Get headers and log them for debugging
-    const headers = lines.shift().split(',').map(header => header.trim());
+    // This function robustly splits a single CSV line
+    const parseCsvLine = (line) => {
+        const values = [];
+        let inQuote = false;
+        let currentValue = '';
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"') {
+                if (inQuote && line[i+1] === '"') {
+                    // Escaped quote ""
+                    currentValue += '"';
+                    i++; // Skip next quote
+                } else {
+                    // Start or end of quote
+                    inQuote = !inQuote;
+                }
+            } else if (char === ',' && !inQuote) {
+                // End of a value
+                values.push(currentValue.trim());
+                currentValue = ''; // Reset for next value
+            } else {
+                // Regular character
+                currentValue += char;
+            }
+        }
+        // Add the last value
+        values.push(currentValue.trim());
+        return values;
+    };
+
+    // Step 3: Get headers
+    const headerLine = lines.shift(); // Get first line
+    const headers = parseCsvLine(headerLine).map(h => h.trim()); // Parse it
     
     // --- THIS IS OUR NEW DEBUGGING LINE ---
     console.log("Parsed CSV Headers:", headers);
     
-    // Step 4: Map lines to objects
-    return lines.map(line => {
-        const values = line.split(',');
-        return headers.reduce((obj, header, index) => {
-            // Use (values[index] || '') to prevent errors on blank/short lines
-            obj[header.trim()] = (values[index] || '').trim();
-            return obj;
-        }, {});
+    // Step 4: Map data lines to objects
+    const result = [];
+    lines.forEach(line => {
+        if (!line) return; // Skip empty lines
+        
+        const values = parseCsvLine(line); // Parse data line
+        
+        if (values.length === headers.length) {
+            const obj = headers.reduce((acc, header, index) => {
+                acc[header] = values[index]; // Use header as-is (already trimmed)
+                return acc;
+            }, {});
+            result.push(obj);
+        } else {
+            console.warn("Skipping line with mismatched columns (expected", headers.length, "got", values.length, "):", line);
+        }
     });
+    
+    return result;
 }
 
 /*
