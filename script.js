@@ -94,14 +94,14 @@ PART 4: POPULATING DROPDOWNS
 ==================================================================
 */
 
-// Populates the "Agency" dropdown with unique agency names
+// Populates the "Agency" dropdown with unique company names
 function populateAgencyDropdown() {
-    // Find all unique agency names
-    const agencies = [...new Set(allContacts.map(contact => contact.Agency))];
-    
-    agencySelect.innerHTML = `<option value="">Select an agency...</option>`;
-    agencies.sort().forEach(agency => {
-        const option = new Option(agency, agency);
+    // Find all unique company names
+    const companies = [...new Set(allContacts.map(contact => contact['COMPANY NAME']))];
+
+    agencySelect.innerHTML = `<option value="">Select a company...</option>`; // <-- Optional: I changed the text
+    companies.sort().forEach(company => {
+        const option = new Option(company, company);
         agencySelect.add(option);
     });
 }
@@ -234,4 +234,5 @@ function copyToClipboard(element, button) {
         button.textContent = originalText;
         button.classList.remove("copied-feedback");
     }, 1500);
+
 }
