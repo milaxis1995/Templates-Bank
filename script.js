@@ -53,8 +53,8 @@ async function loadContacts() {
         allContacts = csvToObjects(csvText);
         
         // Check if data is empty or headers are wrong
-        if (allContacts.length === 0 || !allContacts[0]['COMPANY NAME']) {
-            console.error("Data is empty or 'COMPANY NAME' column not found.");
+        if (allContacts.length === 0 || !allContacts[0] || !allContacts[0]['COMPANY NAME']) {
+            console.error("Data is empty or 'COMPANY NAME' column not found. Check parsed headers in the log above.");
             agencySelect.innerHTML = `<option value="">Check headers</option>`;
             return;
         }
@@ -75,7 +75,7 @@ async function loadTemplates() {
         
         allTemplates = csvToObjects(csvText);
         
-        if (allTemplates.length === 0 || !allTemplates[0]['TemplateName']) {
+        if (allTemplates.length === 0 || !allTemplates[0] || !allTemplates[0]['TemplateName']) {
              console.error("Template data is empty or 'TemplateName' column not found.");
              templateSelect.innerHTML = `<option value="">Check templates</option>`;
              return;
@@ -90,9 +90,28 @@ async function loadTemplates() {
 
 // This helper function turns CSV text into a nice array of objects
 function csvToObjects(csv) {
-    const lines = csv.trim().split('\n');
+    // --- UPDATED PARSER ---
+    let csvData = csv;
+
+    // Step 1: Remove Byte Order Mark (BOM) if present (invisible char)
+    if (csvData.charCodeAt(0) === 0xFEFF) {
+        csvData = csvData.substring(1);
+    }
+    
+    // Step 2: Split into lines robustly (handles \n and \r\n)
+    const lines = csvData.trim().split(/\r?\n/);
+    
+    if (lines.length === 0) {
+        return [];
+    }
+
+    // Step 3: Get headers and log them for debugging
     const headers = lines.shift().split(',').map(header => header.trim());
     
+    // --- THIS IS OUR NEW DEBUGGING LINE ---
+    console.log("Parsed CSV Headers:", headers);
+    
+    // Step 4: Map lines to objects
     return lines.map(line => {
         const values = line.split(',');
         return headers.reduce((obj, header, index) => {
