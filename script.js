@@ -109,14 +109,14 @@ function populateAgencyDropdown() {
 // Populates the "Contact" dropdown based on the selected agency
 function populateContactDropdown(selectedAgency) {
     // Filter contacts that match the selected agency
-    const agencyContacts = allContacts.filter(contact => contact.Agency === selectedAgency);
+    const agencyContacts = allContacts.filter(contact => contact['COMPANY NAME'] === selectedAgency);
     
     contactSelect.innerHTML = `<option value="">Select a contact...</option>`;
     agencyContacts.forEach((contact, index) => {
         // We use the contact's 'Agent Name' for the text
         // We use the *index* of the contact in the allContacts array as its value
         const originalIndex = allContacts.indexOf(contact);
-        const option = new Option(contact['Agent Name'], originalIndex);
+        const option = new Option(contact['AGENT NAME'], originalIndex);
         contactSelect.add(option);
     });
     // Enable the contact dropdown
@@ -236,3 +236,4 @@ function copyToClipboard(element, button) {
     }, 1500);
 
 }
+
