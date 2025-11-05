@@ -142,8 +142,8 @@ function csvToObjects(csv) {
     const headerLine = lines.shift(); // Get first line
     const headers = parseCsvLine(headerLine).map(h => h.trim()); // Parse it
     
-    // --- THIS IS OUR NEW DEBUGGING LINE ---
-    console.log("Parsed CSV Headers:", headers);
+    // --- THIS IS OUR NEW DEBUGGING LINE (CHANGED) ---
+    console.log("Parsed CSV Headers:", JSON.stringify(headers));
     
     // Step 4: Map data lines to objects
     const result = [];
@@ -207,7 +207,7 @@ function populateContactDropdown(selectedCompany) {
 function populateTemplateDropdown() {
     templateSelect.innerHTML = `<option value="">Select a template...</option>`;
     allTemplates.forEach((template, index) => {
-        if (template.TemplateName) { // Avoid blank entries
+        if (template.TemplateName) { // Avoid adding blank entries
             // We use the template's 'TemplateName' for the text
             // We use its index as the value
             const option = new Option(template.TemplateName, index);
