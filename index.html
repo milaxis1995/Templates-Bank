@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Email Template Bank</title>
+    <!-- This links our stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,18 +12,23 @@
     <div class="container">
         <h1>Email Template Bank</h1>
 
+        <!-- Step 1: Selectors -->
         <div class="selectors">
             <div class="dropdown-group">
-                <label for="agency-select">1. Select Agency:</label>
+                <!-- 
+                  This is the label we updated! 
+                  The ID 'agency-select' MUST stay the same, as the script.js file uses it.
+                -->
+                <label for="agency-select">1. Select Company:</label>
                 <select id="agency-select">
-                    <option value="">Loading Agencies...</option>
+                    <option value="">Loading Companies...</option>
                 </select>
             </div>
 
             <div class="dropdown-group">
                 <label for="contact-select">2. Select Contact:</label>
                 <select id="contact-select" disabled>
-                    <option value="">First, select an agency...</option>
+                    <option value="">First, select a company...</option>
                 </select>
             </div>
 
@@ -34,6 +40,7 @@
             </div>
         </div>
 
+        <!-- Step 2: Output -->
         <div class="output">
             <h2>Generated Email</h2>
             
@@ -51,6 +58,10 @@
         </div>
     </div>
 
+    <!-- 
+      This links our 'script.js' file.
+      'defer' means it will run *after* the HTML is loaded.
+    -->
     <script src="script.js" defer></script>
 </body>
 </html>
